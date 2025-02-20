@@ -1,25 +1,19 @@
-FROM golang:1.22 AS builder
+FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
 COPY go.mod go.sum ./
+
 RUN go mod download
 
 COPY . .
 
-RUN go build -o app main.go
-
-RUN go test ./...
+RUN go build -o tracker .
 
 FROM alpine:latest
 
-WORKDIR /root/
+WORKDIR /app
 
-COPY --from=builder /app/app .
+COPY --from=builder /app/tracker .
 
-COPY tracker.db .
-
-RUN apk --no-cache add sqlite
-
-CMD ["./app"]
-
+CMD ["./tracker"]
